@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
+import { useAuth } from '@/hooks/useAuth';
 
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard': 'Dashboard',
@@ -29,15 +30,31 @@ const PAGE_TITLES: Record<string, string> = {
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, loading } = useAuth();
   const [workspace, setWorkspace] = useState<'laundry' | 'ca'>('laundry');
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
+    if (!loading && !user) {
+      router.replace('/login');
+    }
+  }, [loading, user, router]);
+
+  useEffect(() => {
     setWorkspace(pathname.startsWith('/ca') ? 'ca' : 'laundry');
-    setMobileOpen(false); // close drawer on navigation
+    setMobileOpen(false);
   }, [pathname]);
 
   const title = PAGE_TITLES[pathname] || 'LaundryMS';
+
+  if (loading || !user) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-50">
+        <div className="animate-spin w-8 h-8 border-4 border-maroon-600 border-t-transparent rounded-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full min-h-screen">
