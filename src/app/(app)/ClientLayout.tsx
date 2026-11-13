@@ -48,14 +48,14 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
       {/* Mobile drawer overlay */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-40 md:hidden flex">
+        <div className="fixed inset-0 z-40 flex">
           {/* Backdrop */}
           <div
             className="fixed inset-0 bg-black/50"
             onClick={() => setMobileOpen(false)}
           />
           {/* Drawer */}
-          <div className="relative z-50 flex-shrink-0 w-64 transition-transform duration-200">
+          <div className="relative z-50 flex-shrink-0 w-64">
             <Sidebar workspace={workspace} onWorkspaceChange={(w) => { setWorkspace(w); }} />
           </div>
         </div>
