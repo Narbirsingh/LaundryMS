@@ -12,6 +12,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 import { useState } from 'react';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 
 const ICON_MAP: Record<string, any> = {
   LayoutDashboard, ShoppingBag, Users, Truck, Factory, Tag, Package,
@@ -140,6 +141,7 @@ function NavLink({ item, pathname, activeColor }: { item: NavItem; pathname: str
 export default function Sidebar({ workspace, onWorkspaceChange }: SidebarProps) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const navItems = workspace === 'ca' ? CA_NAV : LAUNDRY_NAV;
   const activeColor = workspace === 'ca' ? 'bg-indigo-600' : 'bg-maroon-600';
 
@@ -204,7 +206,7 @@ export default function Sidebar({ workspace, onWorkspaceChange }: SidebarProps) 
             <div className="text-xs text-gray-400 truncate">{user?.role?.replace(/_/g, ' ')}</div>
           </div>
           <button
-            onClick={logout}
+            onClick={() => setShowLogoutConfirm(true)}
             className="text-gray-400 hover:text-white transition-colors"
             title="Logout"
           >
@@ -212,6 +214,17 @@ export default function Sidebar({ workspace, onWorkspaceChange }: SidebarProps) 
           </button>
         </div>
       </div>
+
+      <ConfirmModal
+        open={showLogoutConfirm}
+        title="Sign out?"
+        message="You'll be returned to the login page. Any unsaved work will be lost."
+        confirmLabel="Sign out"
+        cancelLabel="Stay"
+        variant="warning"
+        onConfirm={() => { setShowLogoutConfirm(false); logout(); }}
+        onCancel={() => setShowLogoutConfirm(false)}
+      />
     </div>
   );
 }
