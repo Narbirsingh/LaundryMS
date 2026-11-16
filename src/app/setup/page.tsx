@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { apiClient } from '@/lib/api';
+import apiClient from '@/lib/api';
 import { Shield, Eye, EyeOff } from 'lucide-react';
 
 export default function SetupPage() {
