@@ -9,9 +9,11 @@ const apiClient: AxiosInstance = axios.create({
 });
 
 apiClient.interceptors.request.use((config) => {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  if (typeof window !== 'undefined') {
+    // Use context token (Super Admin switched into a laundry) if present
+    const contextToken = localStorage.getItem('contextToken');
+    const token = contextToken || localStorage.getItem('accessToken');
+    if (token) config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
@@ -20,7 +22,12 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const original = error.config;
-    if (error.response?.status === 401 && !original._retry) {
+    const isAuthEndpoint = original?.url?.includes('/auth/login') ||
+      original?.url?.includes('/auth/register') ||
+      original?.url?.includes('/auth/refresh') ||
+      original?.url?.includes('/platform/setup');
+
+    if (error.response?.status === 401 && !original._retry && !isAuthEndpoint) {
       original._retry = true;
       try {
         const refreshToken = localStorage.getItem('refreshToken');
@@ -235,6 +242,29 @@ export const deliveryApi = {
   getPickupQueue: () => apiClient.get('/delivery/pickup-queue').then(unwrap),
   markDelivered: (id: string) => apiClient.patch(`/delivery/${id}/delivered`).then(unwrap),
   markPickupDone: (id: string) => apiClient.patch(`/delivery/${id}/pickup-done`).then(unwrap),
+};
+
+// Platform (Super Admin only)
+export const platformApi = {
+  getStats: () => apiClient.get('/platform/stats').then(unwrap),
+  listOrganizations: (params?: any) => apiClient.get('/platform/organizations', { params }).then(unwrap),
+  getOrganization: (id: string) => apiClient.get(`/platform/organizations/${id}`).then(unwrap),
+  registerLaundry: (data: any) => apiClient.post('/platform/organizations', data).then(unwrap),
+  editOrganization: (id: string, data: any) => apiClient.patch(`/platform/organizations/${id}`, data).then(unwrap),
+  updateStatus: (id: string, data: any) => apiClient.patch(`/platform/organizations/${id}/status`, data).then(unwrap),
+  updateConfig: (id: string, data: any) => apiClient.patch(`/platform/organizations/${id}/config`, data).then(unwrap),
+  resetPassword: (id: string, newPassword: string) => apiClient.post(`/platform/organizations/${id}/reset-password`, { newPassword }).then(unwrap),
+  deleteOrganization: (id: string, force = false) => apiClient.delete(`/platform/organizations/${id}`, { params: { force } }).then(unwrap),
+  switchContext: (id: string) => apiClient.post(`/platform/organizations/${id}/switch`).then(unwrap),
+  getMonthlyRegistrations: () => apiClient.get('/platform/analytics/registrations').then(unwrap),
+  getRevenueByOrg: () => apiClient.get('/platform/analytics/revenue').then(unwrap),
+  getStatusDistribution: () => apiClient.get('/platform/analytics/status-distribution').then(unwrap),
+  exitContext: () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('contextToken');
+      localStorage.removeItem('contextOrgName');
+    }
+  },
 };
 
 export default apiClient;

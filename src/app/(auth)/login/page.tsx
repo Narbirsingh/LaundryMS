@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Zap, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { Zap, Eye, EyeOff, AlertCircle, Lock } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function LoginPage() {
@@ -13,14 +13,16 @@ export default function LoginPage() {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const isLockError = error.toLowerCase().includes('locked') || error.toLowerCase().includes('locked for');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      await login(email, password);
-      router.push('/dashboard');
+      const res = await login(email, password);
+      const role = res?.data?.user?.role;
+      router.push(role === 'SUPER_ADMIN' ? '/superadmin/dashboard' : '/dashboard');
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Invalid credentials');
     } finally {
@@ -44,9 +46,24 @@ export default function LoginPage() {
           <h2 className="text-lg font-semibold text-gray-900 mb-6">Sign in to your account</h2>
 
           {error && (
-            <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 mb-5">
-              <AlertCircle size={16} className="flex-shrink-0" />
-              {error}
+            <div className={`flex items-start gap-3 text-sm rounded-lg px-4 py-3 mb-5 border ${
+              isLockError
+                ? 'bg-orange-50 border-orange-200 text-orange-800'
+                : 'bg-red-50 border-red-200 text-red-700'
+            }`}>
+              {isLockError
+                ? <Lock size={16} className="flex-shrink-0 mt-0.5" />
+                : <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
+              }
+              <div>
+                <p className="font-medium">{isLockError ? 'Account Locked' : 'Sign in failed'}</p>
+                <p className="mt-0.5 text-xs opacity-90">{error}</p>
+                {isLockError && (
+                  <p className="mt-1 text-xs opacity-75">
+                    Contact your platform administrator to unlock your account immediately.
+                  </p>
+                )}
+              </div>
             </div>
           )}
 

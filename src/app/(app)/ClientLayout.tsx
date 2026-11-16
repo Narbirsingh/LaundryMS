@@ -36,8 +36,12 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.replace('/login');
+    if (!loading) {
+      if (!user) {
+        router.replace('/login');
+      } else if (user.role === 'SUPER_ADMIN') {
+        router.replace('/superadmin/dashboard');
+      }
     }
   }, [loading, user, router]);
 
@@ -48,11 +52,14 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   const title = PAGE_TITLES[pathname] || 'LaundryMS';
 
-  if (loading || !user) {
+  if (loading || !user || user.role === 'SUPER_ADMIN') {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-50">
-        <div className="animate-spin w-8 h-8 border-4 border-maroon-600 border-t-transparent rounded-full" />
-      </div>
+      <>
+        <div className="flex h-screen items-center justify-center bg-gray-50">
+          <div className="animate-spin w-8 h-8 border-4 border-maroon-600 border-t-transparent rounded-full" />
+        </div>
+        <div style={{ display: 'none' }}>{children}</div>
+      </>
     );
   }
 
