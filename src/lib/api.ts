@@ -59,6 +59,8 @@ export const authApi = {
   register: (data: any) => apiClient.post('/auth/register', data).then((r) => r.data),
   logout: () => apiClient.post('/auth/logout').then((r) => r.data),
   getProfile: () => apiClient.get('/auth/profile').then(unwrap),
+  getOrganization: () => apiClient.get('/auth/organization').then(unwrap),
+  updateOrganization: (data: any) => apiClient.patch('/auth/organization', data).then(unwrap),
 };
 
 // Orders

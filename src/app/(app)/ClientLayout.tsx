@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
 import { useAuth } from '@/hooks/useAuth';
+import { cn } from '@/lib/utils';
 
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard': 'Dashboard',
@@ -71,19 +72,17 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       </div>
 
       {/* Mobile drawer overlay */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-40 flex">
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 bg-black/50"
-            onClick={() => setMobileOpen(false)}
-          />
-          {/* Drawer */}
-          <div className="relative z-50 flex-shrink-0 w-64">
-            <Sidebar workspace={workspace} onWorkspaceChange={(w) => { setWorkspace(w); }} />
-          </div>
+      <div className={cn('fixed inset-0 z-40 flex md:hidden transition-all duration-300', mobileOpen ? 'visible' : 'invisible')}>
+        {/* Backdrop */}
+        <div
+          className={cn('fixed inset-0 bg-black/50 transition-opacity duration-300', mobileOpen ? 'opacity-100' : 'opacity-0')}
+          onClick={() => setMobileOpen(false)}
+        />
+        {/* Drawer slide-in */}
+        <div className={cn('relative z-50 flex-shrink-0 w-64 transition-transform duration-300', mobileOpen ? 'translate-x-0' : '-translate-x-full')}>
+          <Sidebar workspace={workspace} onWorkspaceChange={(w) => { setWorkspace(w); }} onClose={() => setMobileOpen(false)} />
         </div>
-      )}
+      </div>
 
       <div className="flex flex-col flex-1 overflow-hidden min-w-0">
         <Header title={title} onMenuClick={() => setMobileOpen(true)} />
