@@ -36,6 +36,7 @@ export default function EditLaundryPage() {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
 
+  const [adminEmail, setAdminEmail] = useState('');
   const [form, setForm] = useState({
     businessName: '', ownerName: '', email: '', phone: '',
     alternatePhone: '', gstin: '', registrationNumber: '',
@@ -45,6 +46,7 @@ export default function EditLaundryPage() {
   useEffect(() => {
     platformApi.getOrganization(id)
       .then((org: any) => {
+        setAdminEmail(org.adminUser?.email || '');
         setForm({
           businessName: org.businessName || '',
           ownerName: org.ownerName || '',
@@ -125,6 +127,13 @@ export default function EditLaundryPage() {
             <Field label="Business Name" name="businessName" value={form.businessName} onChange={set('businessName')} required />
             <Field label="Owner Name" name="ownerName" value={form.ownerName} onChange={set('ownerName')} />
             <Field label="Business Email" name="email" type="email" value={form.email} onChange={set('email')} />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Admin Email <span className="text-xs text-gray-400">(login email, read-only)</span></label>
+              <input
+                type="email" value={adminEmail} readOnly
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+              />
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Mobile <span className="text-red-500">*</span></label>
               <MobileInput label="Mobile" value={form.phone} onChange={set('phone')} required
