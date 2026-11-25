@@ -6,7 +6,8 @@ import { ArrowLeft, ShoppingBag, Edit2, Save, X } from 'lucide-react';
 import StatusBadge from '@/components/ui/StatusBadge';
 import StatsCard from '@/components/ui/StatsCard';
 import { customersApi, ordersApi } from '@/lib/api';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatCurrency, formatDate, getMobileError } from '@/lib/utils';
+import MobileInput from '@/components/ui/MobileInput';
 
 export default function CustomerDetailPage() {
   const { id } = useParams();
@@ -31,6 +32,8 @@ export default function CustomerDetailPage() {
   }, [id]);
 
   const handleSave = async () => {
+    const mobileErr = getMobileError(form.mobile || '', true, 'Mobile');
+    if (mobileErr) { alert(mobileErr); return; }
     setSaving(true);
     try {
       const updated = await customersApi.update(id as string, form);
@@ -100,7 +103,13 @@ export default function CustomerDetailPage() {
           <h3 className="font-medium text-gray-900">Profile</h3>
           {editing ? (
             <div className="space-y-3">
-              {[['Name', 'name'], ['Mobile', 'mobile'], ['Email', 'email']].map(([label, field]) => (
+              {[['Name', 'name'], ['Mobile *', 'mobile'], ['Email', 'email']].map(([label, field]) => field === 'mobile' ? (
+                <div key={field}>
+                  <label className="block text-xs text-gray-500 mb-1">{label}</label>
+                  <MobileInput value={form.mobile || ''} onChange={(v) => setForm((f: any) => ({ ...f, mobile: v }))} required label="Mobile"
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-maroon-500" />
+                </div>
+              ) : (
                 <div key={field}>
                   <label className="block text-xs text-gray-500 mb-1">{label}</label>
                   <input value={form[field] || ''} onChange={(e) => setForm((f: any) => ({ ...f, [field]: e.target.value }))}

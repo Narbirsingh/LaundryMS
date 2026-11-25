@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { platformApi } from '@/lib/api';
+import MobileInput from '@/components/ui/MobileInput';
+import { getMobileError } from '@/lib/utils';
 import { ArrowLeft, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 
@@ -60,6 +62,8 @@ export default function RegisterLaundryPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const mobileErr = getMobileError(form.phone, true, 'Mobile') || getMobileError(form.alternatePhone, false, 'Alternate Mobile');
+    if (mobileErr) { setError(mobileErr); return; }
     setLoading(true);
     setError('');
     try {
@@ -124,8 +128,16 @@ export default function RegisterLaundryPage() {
             <Field label="Business Name" name="businessName" value={form.businessName} onChange={set('businessName')} required />
             <Field label="Owner Name" name="ownerName" value={form.ownerName} onChange={set('ownerName')} required />
             <Field label="Business Email" name="email" type="email" value={form.email} onChange={set('email')} required />
-            <Field label="Phone" name="phone" value={form.phone} onChange={set('phone')} required />
-            <Field label="Alternate Phone" name="alternatePhone" value={form.alternatePhone} onChange={set('alternatePhone')} />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Mobile <span className="text-red-500">*</span></label>
+              <MobileInput label="Mobile" value={form.phone} onChange={set('phone')} required
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-purple-500 bg-white" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Alternate Mobile</label>
+              <MobileInput label="Alternate Mobile" value={form.alternatePhone} onChange={set('alternatePhone')}
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-purple-500 bg-white" />
+            </div>
             <Field label="GSTIN" name="gstin" value={form.gstin} onChange={set('gstin')} />
             <Field label="Registration Number" name="registrationNumber" value={form.registrationNumber} onChange={set('registrationNumber')} />
           </div>

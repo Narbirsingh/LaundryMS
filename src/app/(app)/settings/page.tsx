@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { Save, Building2 } from 'lucide-react';
+import MobileInput from '@/components/ui/MobileInput';
+import { getMobileError } from '@/lib/utils';
 
 const TIMEZONES = ['Asia/Kolkata', 'UTC', 'Asia/Dubai', 'America/New_York'];
 
@@ -38,6 +40,8 @@ export default function SettingsPage() {
   }, []);
 
   const handleSave = () => {
+    const mobileErr = getMobileError(settings.phone, false, 'Mobile');
+    if (mobileErr) { alert(mobileErr); return; }
     localStorage.setItem('lms_settings', JSON.stringify(settings));
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
@@ -98,7 +102,11 @@ export default function SettingsPage() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               {field('Business Name', 'businessName', 'text', 'Your Laundry Name')}
-              {field('Phone', 'phone', 'tel', '+91 98765 43210')}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Mobile</label>
+                <MobileInput label="Mobile" value={settings.phone} onChange={(v) => setSettings({ ...settings, phone: v })}
+                  className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-maroon-500" />
+              </div>
               {field('Email', 'email', 'email', 'info@yourlaundry.com')}
               {field('GSTIN', 'gstin', 'text', '27AABCU9603R1ZX')}
               {field('PAN', 'pan', 'text', 'AABCU9603R')}

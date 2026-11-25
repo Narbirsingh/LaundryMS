@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, ChevronDown } from 'lucide-react';
 import { customersApi } from '@/lib/api';
+import MobileInput from '@/components/ui/MobileInput';
+import { getMobileError } from '@/lib/utils';
 
 interface FieldProps {
   label: string;
@@ -44,7 +46,9 @@ export default function NewCustomerPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.mobile) { setError('Name and mobile are required'); return; }
+    if (!form.name) { setError('Name is required'); return; }
+    const mobileErr = getMobileError(form.mobile, true, 'Mobile');
+    if (mobileErr) { setError(mobileErr); return; }
     setLoading(true); setError('');
     try {
       // Send only filled-in fields so blank optional ones (e.g. email) are omitted
@@ -71,7 +75,11 @@ export default function NewCustomerPage() {
         <h3 className="font-medium text-gray-900">Basic Info</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field label="Full Name" field="name" required placeholder="e.g. Rahul Sharma" value={form.name} onChange={set} />
-          <Field label="Mobile" field="mobile" required placeholder="10-digit mobile number" value={form.mobile} onChange={set} />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Mobile *</label>
+            <MobileInput value={form.mobile} onChange={(v) => set('mobile', v)} required label="Mobile"
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-maroon-500 outline-none" />
+          </div>
           <Field label="Email" field="email" type="email" placeholder="optional" value={form.email} onChange={set} />
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Customer Type</label>
