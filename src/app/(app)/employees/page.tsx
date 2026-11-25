@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { Plus, Search, Users } from 'lucide-react';
 import { employeesApi } from '@/lib/api';
-import { formatCurrency, formatDate, getInitials } from '@/lib/utils';
+import { formatCurrency, formatDate, getInitials, getMobileError } from '@/lib/utils';
+import MobileInput from '@/components/ui/MobileInput';
 
 export default function EmployeesPage() {
   const [employees, setEmployees] = useState<any[]>([]);
@@ -33,6 +34,8 @@ export default function EmployeesPage() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    const mobileErr = getMobileError(form.phone, true, 'Mobile');
+    if (mobileErr) { alert(mobileErr); return; }
     setSaving(true);
     try {
       await employeesApi.create({ ...form, salary: Number(form.salary) });
@@ -172,7 +175,7 @@ export default function EmployeesPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Mobile *</label>
-                  <input required value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  <MobileInput required label="Mobile" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })}
                     className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-maroon-500" />
                 </div>
                 <div>

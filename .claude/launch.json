@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "frontend-render",
+      "runtimeExecutable": "env",
+      "runtimeArgs": ["NEXT_PUBLIC_API_URL=https://laundryms.onrender.com/api/v1", "npm", "run", "dev"],
+      "port": 3000
+    }
+  ]
+}

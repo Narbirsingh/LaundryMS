@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Truck, Package, Plus, Phone, Mail, MapPin, Edit2, Star, ShoppingCart, AlertTriangle } from 'lucide-react';
 import apiClient, { unwrap } from '@/lib/api';
+import MobileInput from '@/components/ui/MobileInput';
+import { getMobileError } from '@/lib/utils';
 
 const suppliersApi = {
   listVendors: () => apiClient.get('/inventory/vendors').then(unwrap),
@@ -41,6 +43,8 @@ export default function SuppliersPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const mobileErr = getMobileError(form.phone, false, 'Mobile');
+    if (mobileErr) { alert(mobileErr); return; }
     if (editing) await suppliersApi.updateVendor(editing.id, form);
     else await suppliersApi.createVendor(form);
     setShowAdd(false); setEditing(null); load();
@@ -189,8 +193,8 @@ export default function SuppliersPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Phone</label>
-                  <input value={form.phone} onChange={set('phone')} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-maroon-500" />
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Mobile</label>
+                  <MobileInput label="Mobile" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-maroon-500" />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-600 mb-1">Email</label>

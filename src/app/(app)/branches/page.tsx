@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Building2, Plus, MapPin, Phone, Mail, Users, Edit2, ToggleLeft } from 'lucide-react';
 import apiClient, { unwrap } from '@/lib/api';
+import MobileInput from '@/components/ui/MobileInput';
+import { getMobileError } from '@/lib/utils';
 
 const branchesApi = {
   list: () => apiClient.get('/branches').then(unwrap),
@@ -48,6 +50,8 @@ export default function BranchesPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const mobileErr = getMobileError(form.phone, false, 'Mobile');
+    if (mobileErr) { alert(mobileErr); return; }
     const payload = { ...form, latitude: form.latitude ? parseFloat(form.latitude) : undefined, longitude: form.longitude ? parseFloat(form.longitude) : undefined };
     if (editing) await branchesApi.update(editing.id, payload);
     else await branchesApi.create(payload);
@@ -177,8 +181,8 @@ export default function BranchesPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Phone</label>
-                  <input value={form.phone} onChange={set('phone')} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-maroon-500" />
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Mobile</label>
+                  <MobileInput label="Mobile" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-maroon-500" />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-gray-600 mb-1">Email</label>

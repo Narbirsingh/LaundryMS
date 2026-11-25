@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { Zap, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { authApi } from '@/lib/api';
+import MobileInput from '@/components/ui/MobileInput';
+import { getMobileError } from '@/lib/utils';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -31,6 +33,11 @@ export default function RegisterPage() {
     }
     if (form.password.length < 8) {
       setError('Password must be at least 8 characters');
+      return;
+    }
+    const mobileErr = getMobileError(form.phone, false, 'Mobile');
+    if (mobileErr) {
+      setError(mobileErr);
       return;
     }
 
@@ -109,13 +116,12 @@ export default function RegisterPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                  Phone <span className="text-gray-400 font-normal">(optional)</span>
+                  Mobile <span className="text-gray-400 font-normal">(optional)</span>
                 </label>
-                <input
-                  type="tel"
+                <MobileInput
+                  label="Mobile"
                   value={form.phone}
-                  onChange={set('phone')}
-                  placeholder="+91 98765 43210"
+                  onChange={(v) => setForm({ ...form, phone: v })}
                   className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-maroon-500 outline-none transition"
                 />
               </div>
