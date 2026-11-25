@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Save, Building2 } from 'lucide-react';
 import MobileInput from '@/components/ui/MobileInput';
 import { getMobileError } from '@/lib/utils';
+import { authApi } from '@/lib/api';
 
 const TIMEZONES = ['Asia/Kolkata', 'UTC', 'Asia/Dubai', 'America/New_York'];
 
@@ -29,22 +30,54 @@ const DEFAULT_SETTINGS = {
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+  const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState('');
   const [tab, setTab] = useState<'general' | 'billing' | 'modules'>('general');
 
   useEffect(() => {
-    const stored = localStorage.getItem('lms_settings');
-    if (stored) {
-      try { setSettings(JSON.parse(stored)); } catch {}
-    }
+    authApi.getOrganization()
+      .then((org: any) => {
+        setError('');
+        const tc = org.taxConfig || {};
+        setSettings({
+          businessName: org.businessName || '',
+          gstin: org.gstin || '',
+          pan: org.pan || '',
+          phone: org.phone || '',
+          email: org.email || '',
+          address: org.address || '',
+          city: org.city || '',
+          pincode: org.pincode || '',
+          timezone: org.timezone || 'Asia/Kolkata',
+          currency: org.currency || 'INR',
+          invoicePrefix: org.invoicePrefix || 'INV',
+          orderPrefix: org.orderPrefix || 'ORD',
+          expressMultiplier: tc.expressMultiplier ?? 1.5,
+          enablePickupDelivery: org.pickupDeliveryAvailable ?? true,
+          enableCAModule: tc.enableCAModule ?? false,
+          defaultGstRate: tc.defaultGstRate ?? 18,
+          taxRegistered: tc.taxRegistered ?? true,
+        });
+      })
+      .catch((err: any) => {
+        const msg = err?.response?.data?.message || err?.message || 'Failed to load settings';
+        setError(msg);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const mobileErr = getMobileError(settings.phone, false, 'Mobile');
-    if (mobileErr) { alert(mobileErr); return; }
-    localStorage.setItem('lms_settings', JSON.stringify(settings));
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    if (mobileErr) { setError(mobileErr); return; }
+    setError('');
+    try {
+      await authApi.updateOrganization(settings);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'Failed to save settings');
+    }
   };
 
   const field = (label: string, key: keyof typeof settings, type = 'text', placeholder = '') => (
@@ -69,6 +102,14 @@ export default function SettingsPage() {
     </div>
   );
 
+  if (loading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-maroon-600 border-t-transparent rounded-full" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-5 max-w-2xl">
       <div className="flex items-center justify-between">
@@ -82,6 +123,9 @@ export default function SettingsPage() {
           {saved ? 'Saved!' : 'Save Changes'}
         </button>
       </div>
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700">{error}</div>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-1">

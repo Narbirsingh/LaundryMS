@@ -89,9 +89,10 @@ const CA_NAV = [
 interface SidebarProps {
   workspace: 'laundry' | 'ca';
   onWorkspaceChange: (w: 'laundry' | 'ca') => void;
+  onClose?: () => void;
 }
 
-function NavLink({ item, pathname, activeColor }: { item: NavItem; pathname: string; activeColor: string }) {
+function NavLink({ item, pathname, activeColor, onClose }: { item: NavItem; pathname: string; activeColor: string; onClose?: () => void }) {
   const Icon = ICON_MAP[item.icon] || LayoutDashboard;
   const hasChildren = item.children && item.children.length > 0;
   const isChildActive = hasChildren && item.children!.some(c => pathname === c.href || pathname.startsWith(`${c.href}/`));
@@ -114,7 +115,7 @@ function NavLink({ item, pathname, activeColor }: { item: NavItem; pathname: str
         {open && (
           <div className="ml-4 mt-0.5 space-y-0.5 border-l border-gray-700 pl-3">
             {item.children!.map(child => (
-              <NavLink key={child.href} item={child} pathname={pathname} activeColor={activeColor} />
+              <NavLink key={child.href} item={child} pathname={pathname} activeColor={activeColor} onClose={onClose} />
             ))}
           </div>
         )}
@@ -126,6 +127,7 @@ function NavLink({ item, pathname, activeColor }: { item: NavItem; pathname: str
   return (
     <Link
       href={item.href}
+      onClick={onClose}
       className={cn(
         'flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all',
         isActive ? `${activeColor} text-white` : 'text-gray-400 hover:bg-gray-800 hover:text-white',
@@ -138,7 +140,7 @@ function NavLink({ item, pathname, activeColor }: { item: NavItem; pathname: str
   );
 }
 
-export default function Sidebar({ workspace, onWorkspaceChange }: SidebarProps) {
+export default function Sidebar({ workspace, onWorkspaceChange, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -150,13 +152,18 @@ export default function Sidebar({ workspace, onWorkspaceChange }: SidebarProps) 
       {/* Logo */}
       <div className="px-4 py-5 border-b border-gray-700">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-maroon-600 rounded-lg flex items-center justify-center">
+          <div className="w-9 h-9 bg-maroon-600 rounded-lg flex items-center justify-center flex-shrink-0">
             <Zap size={20} className="text-white" />
           </div>
-          <div>
+          <div className="flex-1 min-w-0">
             <div className="font-bold text-sm leading-tight">LaundryMS</div>
             <div className="text-xs text-gray-400 leading-tight">Enterprise Edition</div>
           </div>
+          {onClose && (
+            <button onClick={onClose} className="text-gray-400 hover:text-white p-1 rounded-lg hover:bg-gray-800 md:hidden">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+          )}
         </div>
       </div>
 
@@ -191,7 +198,7 @@ export default function Sidebar({ workspace, onWorkspaceChange }: SidebarProps) 
       {/* Nav items */}
       <nav className="flex-1 px-3 py-3 overflow-y-auto space-y-0.5">
         {navItems.map((item) => (
-          <NavLink key={item.href} item={item} pathname={pathname} activeColor={activeColor} />
+          <NavLink key={item.href} item={item} pathname={pathname} activeColor={activeColor} onClose={onClose} />
         ))}
       </nav>
 
