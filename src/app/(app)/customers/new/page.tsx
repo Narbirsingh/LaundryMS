@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ChevronDown } from 'lucide-react';
 import { customersApi } from '@/lib/api';
 
 interface FieldProps {
@@ -47,7 +47,11 @@ export default function NewCustomerPage() {
     if (!form.name || !form.mobile) { setError('Name and mobile are required'); return; }
     setLoading(true); setError('');
     try {
-      const customer = await customersApi.create(form);
+      // Send only filled-in fields so blank optional ones (e.g. email) are omitted
+      const payload = Object.fromEntries(
+        Object.entries(form).map(([k, v]) => [k, v.trim()]).filter(([, v]) => v !== ''),
+      );
+      const customer = await customersApi.create(payload);
       router.push(`/customers/${(customer as any).id}`);
     } catch (err: any) {
       setError(err?.response?.data?.message || 'Failed to create customer');
@@ -71,14 +75,17 @@ export default function NewCustomerPage() {
           <Field label="Email" field="email" type="email" placeholder="optional" value={form.email} onChange={set} />
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Customer Type</label>
+            <div className="relative">
             <select value={form.type} onChange={(e) => set('type', e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-maroon-500 outline-none">
+              className="w-full appearance-none bg-white pl-3 pr-10 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-maroon-500 outline-none">
               <option value="INDIVIDUAL">Individual</option>
               <option value="CORPORATE">Corporate</option>
               <option value="HOTEL">Hotel</option>
               <option value="HOSPITAL">Hospital</option>
               <option value="RESTAURANT">Restaurant</option>
             </select>
+            <ChevronDown size={16} className="pointer-events-none absolute right-[15px] top-1/2 -translate-y-1/2 text-gray-500" />
+            </div>
           </div>
         </div>
       </div>
