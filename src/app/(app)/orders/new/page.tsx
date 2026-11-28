@@ -99,7 +99,7 @@ export default function NewOrderPage() {
             <select
               value={form.customerId}
               onChange={(e) => setForm({ ...form, customerId: e.target.value })}
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-maroon-500 outline-none"
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-maroon-500 outline-none bg-white text-gray-900"
             >
               <option value="">Select customer...</option>
               {customers.map((c) => (
@@ -112,7 +112,7 @@ export default function NewOrderPage() {
             <select
               value={form.source}
               onChange={(e) => setForm({ ...form, source: e.target.value })}
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-maroon-500 outline-none"
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-maroon-500 outline-none bg-white text-gray-900"
             >
               {['WALK_IN', 'PHONE', 'APP', 'WEBSITE', 'WHATSAPP'].map((s) => (
                 <option key={s} value={s}>{s.replace('_', ' ')}</option>
@@ -187,7 +187,7 @@ export default function NewOrderPage() {
                       updateItem(i, 'gstRate', Number(svc.gstRate));
                     }
                   }}
-                  className="w-full px-2 py-2 text-sm border border-gray-200 rounded-lg focus:ring-1 focus:ring-maroon-500 outline-none"
+                  className="w-full px-2 py-2 text-sm border border-gray-200 rounded-lg focus:ring-1 focus:ring-maroon-500 outline-none bg-white text-gray-900"
                 >
                   <option value="">Select or type...</option>
                   {services.map((s) => (
