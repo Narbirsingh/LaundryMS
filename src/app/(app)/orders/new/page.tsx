@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import { ordersApi, customersApi, servicesApi } from '@/lib/api';
+import Select from '@/components/ui/Select';
 
 type OrderItem = { serviceName: string; serviceId: string; quantity: number; unitPrice: number; gstRate: number; discountAmount: number; isExpress: boolean };
 type Garment = { name: string; category: string; quantity: number; color: string; conditionAtReceipt: string };
@@ -96,28 +97,20 @@ export default function NewOrderPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Customer *</label>
-            <select
+            <Select
               value={form.customerId}
-              onChange={(e) => setForm({ ...form, customerId: e.target.value })}
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-maroon-500 outline-none bg-white text-gray-900"
-            >
-              <option value="">Select customer...</option>
-              {customers.map((c) => (
-                <option key={c.id} value={c.id}>{c.name} — {c.mobile}</option>
-              ))}
-            </select>
+              onChange={(v) => setForm({ ...form, customerId: v })}
+              placeholder="Select customer..."
+              options={customers.map((c) => ({ value: c.id, label: `${c.name} — ${c.mobile}` }))}
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Source</label>
-            <select
+            <Select
               value={form.source}
-              onChange={(e) => setForm({ ...form, source: e.target.value })}
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-maroon-500 outline-none bg-white text-gray-900"
-            >
-              {['WALK_IN', 'PHONE', 'APP', 'WEBSITE', 'WHATSAPP'].map((s) => (
-                <option key={s} value={s}>{s.replace('_', ' ')}</option>
-              ))}
-            </select>
+              onChange={(v) => setForm({ ...form, source: v })}
+              options={['WALK_IN', 'PHONE', 'APP', 'WEBSITE', 'WHATSAPP'].map((s) => ({ value: s, label: s.replace('_', ' ') }))}
+            />
           </div>
         </div>
         <div className="flex flex-wrap gap-4">
@@ -176,24 +169,20 @@ export default function NewOrderPage() {
             <div key={i} className="grid grid-cols-12 gap-2 items-end">
               <div className="col-span-4">
                 {i === 0 && <label className="block text-xs text-gray-500 mb-1">Service</label>}
-                <select
+                <Select
                   value={item.serviceId}
-                  onChange={(e) => {
-                    const svc = services.find((s) => s.id === e.target.value);
-                    updateItem(i, 'serviceId', e.target.value);
+                  onChange={(v) => {
+                    const svc = services.find((s) => s.id === v);
+                    updateItem(i, 'serviceId', v);
                     if (svc) {
                       updateItem(i, 'serviceName', svc.name);
                       updateItem(i, 'unitPrice', Number(svc.basePrice));
                       updateItem(i, 'gstRate', Number(svc.gstRate));
                     }
                   }}
-                  className="w-full px-2 py-2 text-sm border border-gray-200 rounded-lg focus:ring-1 focus:ring-maroon-500 outline-none bg-white text-gray-900"
-                >
-                  <option value="">Select or type...</option>
-                  {services.map((s) => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
-                  ))}
-                </select>
+                  placeholder="Select or type..."
+                  options={services.map((s) => ({ value: s.id, label: s.name }))}
+                />
               </div>
               <div className="col-span-2">
                 {i === 0 && <label className="block text-xs text-gray-500 mb-1">Qty</label>}
