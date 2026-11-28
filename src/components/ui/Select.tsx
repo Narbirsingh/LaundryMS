@@ -42,6 +42,17 @@ export default function Select({ value, onChange, options, placeholder = 'Select
 
       {open && (
         <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-56 overflow-y-auto">
+          <div
+            onClick={() => { onChange(''); setOpen(false); }}
+            className={cn(
+              'flex items-center px-3 py-2 text-sm cursor-pointer border-b border-gray-100',
+              value === ''
+                ? 'bg-maroon-600 text-white'
+                : 'text-gray-400 hover:bg-maroon-50 hover:text-maroon-700'
+            )}
+          >
+            {placeholder}
+          </div>
           {options.map((opt) => (
             <div
               key={opt.value}
